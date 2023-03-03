@@ -343,13 +343,15 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
 
       // Keep the reader from blowing through the file.
       if (!read_fast_) {
-        packet_rate_.sleep();
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+//        packet_rate_.sleep();
       }
 
       ::memcpy(&pkt->data[0], pkt_data + 42, packet_size);
       (void)time_offset;
       // time_offset not considered here, as no synchronization required
-      pkt->stamp = private_nh_->get_clock()->now();
+      pkt->stamp = rclcpp::Time(header->ts.tv_sec, header->ts.tv_usec * 1000);
+//      pkt->stamp = private_nh_->get_clock()->now();
       empty_ = false;
       return 0;                   // success
     }
@@ -362,7 +364,7 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
     }
 
     if (read_once_) {
-      RCLCPP_INFO(private_nh_->get_logger(), "end of file reached -- done reading.");
+//      RCLCPP_INFO(private_nh_->get_logger(), "end of file reached -- done reading.");
       return -1;
     }
 
